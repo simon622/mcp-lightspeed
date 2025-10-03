@@ -7,5 +7,7 @@ public interface McpRegistry {
     McpConfig getConfig();
 
     void setConfig(McpConfig config);
+
+    void discover();
 }
 

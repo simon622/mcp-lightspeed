@@ -16,6 +16,7 @@ public class McpRegistryImpl implements McpRegistry {
     private static volatile McpRegistryImpl instance;
 
     private McpConfig config;
+    private List<McpConfig.Api> apis;
 
     public static McpRegistryImpl getInstance() {
         if(instance == null){
@@ -33,18 +34,22 @@ public class McpRegistryImpl implements McpRegistry {
     }
 
     public void setConfig(final McpConfig config) {
-        initializeFromApis(config);
         this.config = config;
+    }
+
+    public void discover(){
+        initializeFromApis(config);
     }
 
     private void initializeFromApis(final McpConfig config){
         if(!config.apis().isEmpty()){
-            if(this.config == null || !Objects.equals(this.config.apis(),config.tools())){
+            if(this.config == null || !Objects.equals(this.apis,config.apis())){
+                config.tools().clear();
                 config.apis().forEach(api -> {
                     List<McpConfig.Tool> tools = readToolsFromApi(api);
-                    config.tools().clear();
                     config.tools().addAll(tools);
                 });
+                this.apis = config.apis();
             }
         }
     }

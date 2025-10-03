@@ -5,6 +5,7 @@
     <title>Lightspeed MCP Gateway</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="./script.js"></script>
     <style>
         :root {
             --primary-color: #f4862c;
@@ -55,7 +56,7 @@
         <button class="tab inactive" data-target="models">Models</button>
         <button class="tab inactive" data-target="prompts">Prompts</button>
         <button class="tab inactive" data-target="apis">APIs</button>
-        <button class="tab inactive" data-target="export">Export / Import</button>
+        <button class="tab inactive" data-target="export">Configuration</button>
     </div>
 
     <!-- Welcome -->
@@ -113,15 +114,14 @@
         <ul id="apisList" class="space-y-2"></ul>
     </div>
 
-    <!-- Export -->
+    <!-- Config -->
     <div id="export" class="tab-pane hidden">
         <div class="bg-white rounded shadow p-6">
             <h2 class="text-xl font-semibold mb-4">Export / Import</h2>
             <div class="flex space-x-2 mb-3">
                 <button onclick="exportData()" class="bg-[var(--secondary-color)] text-white px-4 py-2 rounded hover:opacity-90 text-sm font-medium">Export JSON</button>
-                <button onclick="loadGraph()" class="bg-[var(--primary-color)] text-white px-4 py-2 rounded hover:opacity-90 text-sm font-medium">Reload from Server</button>
+                <button onclick="discoverApis()" class="bg-[var(--primary-color)] text-white px-4 py-2 rounded hover:opacity-90 text-sm font-medium">Discover APIs</button>
             </div>
-            <input type="file" onchange="importData(event)" class="block w-full text-sm text-gray-700 mb-3" />
             <pre id="output" class="bg-gray-100 p-3 rounded border text-sm"></pre>
         </div>
     </div>
@@ -175,6 +175,8 @@
         </div>
     </div>
 </div>
+
+<div id="toast-container" class="fixed bottom-6 right-6 z-50 space-y-3"></div>
 
 <footer class="mt-6 py-4 text-center text-gray-400 text-sm border-t">
     © 2025 MCP Lightspeed Gateway — Built for managing tools, models, and clusters.
@@ -243,6 +245,7 @@
     }
     // ------------------ Rendering ------------------
     function renderList(type) {
+        console.log("Rendering ", (type + "List"));
         const list = document.getElementById(type + "List");
         list.innerHTML = "";
         const arr = mcpGraph[type];
@@ -309,10 +312,26 @@
     function toggleEnabled(type, idx, el){ mcpGraph[type][idx].enabled=el.checked; saveGraph(); }
     function deleteItem(type, idx){ mcpGraph[type].splice(idx,1); renderList(type); saveGraph(); }
     function exportData(){ document.getElementById("output").textContent=JSON.stringify(mcpGraph,null,2); }
-    function importData(e){ const file=e.target.files[0]; if(!file)return; const reader=new FileReader(); reader.onload=evt=>{ try{ const parsed=JSON.parse(evt.target.result); mcpGraph=parsed; ["tools","resources","models","prompts","apis","cluster"].forEach(renderList); saveGraph(); } catch{ alert("Invalid JSON"); } }; reader.readAsText(file); }
 
     function saveGraph() {
         fetch("/api/mcp-config/save", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(mcpGraph, null, 2)
+        })
+            .then(async (r) => {
+                if (!r.ok) {
+                    console.error("Save failed", r.status);
+                    showToast("Save failed: " + r.status, 4000);
+                    return;
+                }
+                showToast("Configuration saved");
+            })
+            .catch(err => console.error("Save error", err));
+    }
+
+    function discoverApis() {
+        fetch("/api/mcp-config/discover", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(mcpGraph, null, 2)
@@ -324,7 +343,9 @@
                 }
                 const data = await r.json();
                 mcpGraph = data;
-                ["tools","resources","models","prompts","apis","cluster"].forEach(renderList);
+                ["tools","resources","models","prompts","apis"].forEach(renderList);
+
+                showToast("APIs discovered");
             })
             .catch(err => console.error("Save error", err));
     }
@@ -338,7 +359,7 @@
             }
             const data = await res.json();
             mcpGraph = data;
-            ["tools","resources","models","prompts","apis","cluster"].forEach(renderList);
+            ["tools","resources","models","prompts","apis"].forEach(renderList);
         } catch (err) {
             console.error("Failed to load graph", err);
         }
