@@ -13,12 +13,19 @@ public class ServerMain {
 
     public static void main(String[] args) throws Exception {
 
-        ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        ServletContextHandler context = new ServletContextHandler(ServletContextHandler.NO_SESSIONS);
         context.setContextPath("/");
-        context.addServlet(ServletContainer.class, "/api/*").setInitParameter(
-                "jersey.config.server.provider.packages", "org.slj.lightspeed.mcp.resources");
 
-// Serve static content from classpath (src/main/resources/web)
+        // Add Jersey ServletContainer
+        ResourceConfig config = new ResourceConfig()
+                .packages("org.slj.lightspeed.mcp.resources")
+                .register(org.glassfish.jersey.jackson.JacksonFeature.class);
+
+        ServletHolder jerseyServlet = new ServletHolder(new ServletContainer(config));
+        context.addServlet(jerseyServlet, "/api/*");
+
+
+// STATIC
         ServletHolder staticHolder = new ServletHolder("static", DefaultServlet.class);
 
         String resourceBase = Objects.requireNonNull(ServerMain.class.getClassLoader()

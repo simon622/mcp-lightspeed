@@ -172,10 +172,6 @@
                     <span class="text-sm text-gray-700">Enabled</span>
                 </label>
             </div>
-            <div class="flex justify-end space-x-2 p-4 border-t">
-                <button onclick="closeClusterModal()" class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">Cancel</button>
-                <button onclick="saveCluster()" class="px-4 py-2 bg-[var(--primary-color)] text-white rounded hover:opacity-90">Save</button>
-            </div>
         </div>
     </div>
 </div>
@@ -283,8 +279,12 @@
     function exportData(){ document.getElementById("output").textContent=JSON.stringify(mcpGraph,null,2); }
     function importData(e){ const file=e.target.files[0]; if(!file)return; const reader=new FileReader(); reader.onload=evt=>{ try{ const parsed=JSON.parse(evt.target.result); mcpGraph=parsed; ["tools","resources","models","prompts","apis","cluster"].forEach(renderList); saveGraph(); } catch{ alert("Invalid JSON"); } }; reader.readAsText(file); }
 
-    function saveGraph(){ fetch("/save",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(mcpGraph,null,2)}).then(r=>{if(!r.ok)console.error("Save failed",r.status);}).catch(err=>console.error("Save error",err)); }
-    async function loadGraph(){ try{ const res=await fetch("/load"); if(!res.ok){console.warn("No saved graph found"); return;} const data=await res.json(); mcpGraph=data; ["tools","resources","models","prompts","apis","cluster"].forEach(renderList); } catch(err){ console.error("Failed to load graph",err); } }
+    function saveGraph(){
+        fetch("/api/mcp-config/save",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(mcpGraph,null,2)}).
+        then(r=>{if(!r.ok)console.error("Save failed",r.status);}).
+        catch(err=>console.error("Save error",err)); }
+
+    async function loadGraph(){ try{ const res=await fetch("/api/mcp-config/load"); if(!res.ok){console.warn("No saved graph found"); return;} const data=await res.json(); mcpGraph=data; ["tools","resources","models","prompts","apis","cluster"].forEach(renderList); } catch(err){ console.error("Failed to load graph",err); } }
 
     // ------------------ Tab Switching ------------------
     function switchTab(id){ document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active","inactive")); document.querySelectorAll(".tab").forEach(t=>t.classList.add("inactive")); const tab=document.querySelector(`.tab[data-target="${id}"]`); if(tab)tab.classList.add("active"); document.querySelectorAll(".tab-pane").forEach(p=>p.classList.add("hidden")); document.getElementById(id).classList.remove("hidden"); }
