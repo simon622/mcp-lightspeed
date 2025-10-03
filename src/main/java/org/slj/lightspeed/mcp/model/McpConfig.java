@@ -23,7 +23,9 @@ public record McpConfig (
     public record Tool(
             String name,
             String description,
-            @JsonProperty("input_schema") Schema inputSchema
+            @JsonProperty("input_schema") Schema inputSchema,
+            boolean enabled,
+            Api api
     ) {}
 
     public record Schema(
@@ -43,7 +45,8 @@ public record McpConfig (
             String name,
             List<String> capabilities,
             Limits limits,
-            String provider
+            String provider,
+            boolean enabled
     ) {}
 
     public record Limits(
@@ -55,14 +58,16 @@ public record McpConfig (
             String uri,
             String name,
             String description,
-            String mimeType
+            String mimeType,
+            boolean enabled
     ) {}
 
     public record Prompt(
             String name,
             String description,
             List<Argument> arguments,
-            String template
+            String template,
+            boolean enabled
     ) {}
 
     public record Argument(
@@ -76,7 +81,8 @@ public record McpConfig (
             String url,
             String apiKey,
             String username,
-            String password
+            String password,
+            boolean enabled
     ) {}
 }
 

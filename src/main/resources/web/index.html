@@ -242,27 +242,59 @@
         } catch { alert("Invalid JSON"); }
     }
     // ------------------ Rendering ------------------
-    function renderList(type){
-        const list=document.getElementById(type+"List"); list.innerHTML=""; const arr=mcpGraph[type];
-        if(arr.length===0){
-            const container=document.createElement("div"); container.className="flex flex-col items-center justify-center text-center py-16";
-            const p=document.createElement("p"); p.className="text-gray-500 mb-6 max-w-md"; p.textContent=descriptions[type]; container.appendChild(p);
-            const btn=document.createElement("button"); btn.className="bg-[var(--primary-color)] text-white px-6 py-3 rounded-lg text-lg font-semibold hover:opacity-90 shadow"; btn.textContent=`Create my first ${singular[type]}`;
-            btn.onclick=()=>{if(type==="cluster")openClusterModal(); else openJsonModal(type);}; container.appendChild(btn);
-            list.appendChild(container); return;
+    function renderList(type) {
+        const list = document.getElementById(type + "List");
+        list.innerHTML = "";
+        const arr = mcpGraph[type];
+
+        if (arr.length === 0) {
+            const container = document.createElement("div");
+            container.className = "flex flex-col items-center justify-center text-center py-16";
+
+            const p = document.createElement("p");
+            p.className = "text-gray-500 mb-6 max-w-md";
+            p.textContent = descriptions[type];
+            container.appendChild(p);
+
+            const btn = document.createElement("button");
+            btn.className = "bg-[var(--primary-color)] text-white px-6 py-3 rounded-lg text-lg font-semibold hover:opacity-90 shadow";
+            btn.textContent = `Create my first ${singular[type]}`;
+            btn.onclick = () => { openJsonModal(type); };
+            container.appendChild(btn);
+
+            list.appendChild(container);
+            return;
         }
-        arr.forEach((item,idx)=>{
-            if(type==="cluster"){
-                let statusClass=!item.host||!item.port?"status-amber":(item.enabled?"status-green":"status-red");
-                const li=document.createElement("li"); li.className="flex justify-between items-center bg-white p-3 rounded shadow";
-                li.innerHTML=`<div class="flex items-center space-x-2"><span class="status-ball ${statusClass}"></span><span class="font-medium text-gray-700">${item.protocol}://${item.host}:${item.port}</span></div><div><button class="bg-gray-200 px-2 py-1 rounded text-xs" onclick="openClusterModal(${idx})">Edit</button><button class="bg-red-600 text-white px-2 py-1 rounded text-xs" onclick="deleteItem('cluster',${idx})">Delete</button></div>`;
-                list.appendChild(li);
-            } else {
-                const id=`${type}-spark-${idx}`;
-                const li=document.createElement("li"); li.className="flex justify-between items-center bg-white p-3 rounded shadow";
-                li.innerHTML=`<div class="flex items-center space-x-2"><label class="switch"><input type="checkbox" ${item.enabled!==false?"checked":""} onchange="toggleEnabled('${type}',${idx},this)"><span class="slider"></span></label><span class="font-medium text-gray-700">${item.name||"(no name)"}${item.description?" – <em>"+item.description+"</em>":""}</span></div><div class="flex items-center space-x-3"><div class="sparkline"><canvas id="${id}" width="96" height="24"></canvas></div><button class="bg-gray-200 px-2 py-1 rounded text-xs" onclick="openJsonModal('${type}',${idx})">Edit</button><button class="bg-red-600 text-white px-2 py-1 rounded text-xs" onclick="deleteItem('${type}',${idx})">Delete</button></div>`;
-                list.appendChild(li); setTimeout(()=>initSparkline(id),50);
+
+        arr.forEach((item, idx) => {
+            const id = `${type}-spark-${idx}`;
+            const li = document.createElement("li");
+            li.className = "flex justify-between items-center bg-white p-3 rounded shadow";
+
+            // Add lozenge for Tools if API name exists
+            let extra = "";
+            if (type === "tools" && item.api && item.api.name) {
+                extra = ` <span class="ml-2 inline-block bg-[var(--accent-color)] text-white text-xs px-2 py-0.5 rounded-full">${item.api.name}</span>`;
             }
+
+            li.innerHTML = `
+            <div class="flex items-center space-x-2">
+              <label class="switch">
+                <input type="checkbox" ${item.enabled !== false ? "checked" : ""} onchange="toggleEnabled('${type}',${idx},this)">
+                <span class="slider"></span>
+              </label>
+              <span class="font-medium text-gray-700">
+                ${item.name || "(no name)"}${item.description ? " – <em>"+item.description+"</em>" : ""}${extra}
+              </span>
+            </div>
+            <div class="flex items-center space-x-3">
+              <div class="sparkline"><canvas id="${id}" width="96" height="24"></canvas></div>
+              <button class="bg-gray-200 px-2 py-1 rounded text-xs" onclick="openJsonModal('${type}',${idx})">Edit</button>
+              <button class="bg-red-600 text-white px-2 py-1 rounded text-xs" onclick="deleteItem('${type}',${idx})">Delete</button>
+            </div>`;
+
+            list.appendChild(li);
+            setTimeout(() => initSparkline(id), 100);
         });
     }
 
@@ -279,12 +311,38 @@
     function exportData(){ document.getElementById("output").textContent=JSON.stringify(mcpGraph,null,2); }
     function importData(e){ const file=e.target.files[0]; if(!file)return; const reader=new FileReader(); reader.onload=evt=>{ try{ const parsed=JSON.parse(evt.target.result); mcpGraph=parsed; ["tools","resources","models","prompts","apis","cluster"].forEach(renderList); saveGraph(); } catch{ alert("Invalid JSON"); } }; reader.readAsText(file); }
 
-    function saveGraph(){
-        fetch("/api/mcp-config/save",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(mcpGraph,null,2)}).
-        then(r=>{if(!r.ok)console.error("Save failed",r.status);}).
-        catch(err=>console.error("Save error",err)); }
+    function saveGraph() {
+        fetch("/api/mcp-config/save", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(mcpGraph, null, 2)
+        })
+            .then(async (r) => {
+                if (!r.ok) {
+                    console.error("Save failed", r.status);
+                    return;
+                }
+                const data = await r.json();
+                mcpGraph = data;
+                ["tools","resources","models","prompts","apis","cluster"].forEach(renderList);
+            })
+            .catch(err => console.error("Save error", err));
+    }
 
-    async function loadGraph(){ try{ const res=await fetch("/api/mcp-config/load"); if(!res.ok){console.warn("No saved graph found"); return;} const data=await res.json(); mcpGraph=data; ["tools","resources","models","prompts","apis","cluster"].forEach(renderList); } catch(err){ console.error("Failed to load graph",err); } }
+    async function loadGraph() {
+        try {
+            const res = await fetch("/api/mcp-config/load");
+            if (!res.ok) {
+                console.warn("No saved graph found");
+                return;
+            }
+            const data = await res.json();
+            mcpGraph = data;
+            ["tools","resources","models","prompts","apis","cluster"].forEach(renderList);
+        } catch (err) {
+            console.error("Failed to load graph", err);
+        }
+    }
 
     // ------------------ Tab Switching ------------------
     function switchTab(id){ document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active","inactive")); document.querySelectorAll(".tab").forEach(t=>t.classList.add("inactive")); const tab=document.querySelector(`.tab[data-target="${id}"]`); if(tab)tab.classList.add("active"); document.querySelectorAll(".tab-pane").forEach(p=>p.classList.add("hidden")); document.getElementById(id).classList.remove("hidden"); }

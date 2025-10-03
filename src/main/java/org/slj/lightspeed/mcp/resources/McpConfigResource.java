@@ -5,8 +5,8 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 import org.slj.lightspeed.mcp.model.McpConfig;
+import org.slj.lightspeed.mcp.services.impl.McpRegistryImpl;
 
 @Path("/mcp-config")
 @Produces(MediaType.APPLICATION_JSON)
@@ -16,13 +16,15 @@ public class McpConfigResource {
     @POST
     @Path("/save")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response save(final McpConfig config) {
+    public McpConfig save(final McpConfig config) {
 
         System.out.println("Received MCP config: " + config);
 
-        // Example response
-        return Response.ok()
-                .entity("{\"status\":\"saved\",\"server\":\"" + config.name() + "\"}")
-                .build();
+        McpRegistryImpl.getInstance().setConfig(config);
+        return McpRegistryImpl.getInstance().getConfig();
+
+//        return Response.ok()
+//                .entity("{\"status\":\"saved\",\"server\":\"" + config.name() + "\"}")
+//                .build();
     }
 }
