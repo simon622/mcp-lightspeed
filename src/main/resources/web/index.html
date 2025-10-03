@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lightspeed MCP Gateway</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="./style.css" />
+    <script src="./script.js"></script>
+</head>
+<body class="bg-gray-50 p-8 font-sans">
+
+<header class="flex items-center mb-6">
+    <img src="./image.png" alt="Logo" class="w-20 h-20 rounded-full mr-3 shadow">
+    <h1 class="text-3xl font-bold text-gray-800">Lightspeed MCP Gateway</h1>
+</header>
+
+<div class="ml-8">
+
+    <!-- Tabs -->
+    <div class="tab-bar mb-4 rounded-t-lg">
+        <button class="tab active" data-target="welcome">Welcome</button>
+        <button class="tab inactive" data-target="tools">Tools</button>
+        <button class="tab inactive" data-target="resources">Resources</button>
+        <button class="tab inactive" data-target="models">Models</button>
+        <button class="tab inactive" data-target="prompts">Prompts</button>
+        <button class="tab inactive" data-target="apis">APIs</button>
+        <button class="tab inactive" data-target="cluster">Cluster</button>
+        <button class="tab inactive" data-target="export">Export / Import</button>
+    </div>
+
+    <!-- Welcome -->
+    <div id="welcome" class="tab-pane">
+        <div class="bg-white rounded shadow p-6 text-center">
+            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Welcome to the MCP Lightspeed Gateway</h2>
+            <p class="mb-4 text-gray-700">The MCP Lightspeed Gateway provides a unified interface to manage all your Models, Tools, Resources, Prompts, APIs and Cluster nodes.</p>
+            <p class="mb-4 text-gray-700">Use the tabs above to add, edit, and monitor objects. Each object row comes with live sparklines or status indicators, while the Export / Import tab allows you to manage your configurations with ease.</p>
+            <div class="flex justify-center">
+                <button onclick="switchTab('export')" class="bg-[var(--primary-color)] text-white px-8 py-4 rounded-lg hover:opacity-90 text-xl font-semibold shadow">
+                    Get Started →
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Object Tabs -->
+    <div id="tools" class="tab-pane hidden">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">Tools</h2>
+            <button onclick="openJsonModal('tools')" class="bg-[var(--primary-color)] text-white px-4 py-2 rounded hover:opacity-90 text-sm font-medium">+ Add Tool</button>
+        </div>
+        <ul id="toolsList" class="space-y-2"></ul>
+    </div>
+
+    <div id="resources" class="tab-pane hidden">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">Resources</h2>
+            <button onclick="openJsonModal('resources')" class="bg-[var(--primary-color)] text-white px-4 py-2 rounded hover:opacity-90 text-sm font-medium">+ Add Resource</button>
+        </div>
+        <ul id="resourcesList" class="space-y-2"></ul>
+    </div>
+
+    <div id="models" class="tab-pane hidden">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">Models</h2>
+            <button onclick="openJsonModal('models')" class="bg-[var(--primary-color)] text-white px-4 py-2 rounded hover:opacity-90 text-sm font-medium">+ Add Model</button>
+        </div>
+        <ul id="modelsList" class="space-y-2"></ul>
+    </div>
+
+    <div id="prompts" class="tab-pane hidden">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">Prompts</h2>
+            <button onclick="openJsonModal('prompts')" class="bg-[var(--primary-color)] text-white px-4 py-2 rounded hover:opacity-90 text-sm font-medium">+ Add Prompt</button>
+        </div>
+        <ul id="promptsList" class="space-y-2"></ul>
+    </div>
+
+    <div id="apis" class="tab-pane hidden">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">APIs</h2>
+            <button onclick="openJsonModal('apis')" class="bg-[var(--primary-color)] text-white px-4 py-2 rounded hover:opacity-90 text-sm font-medium">+ Add API</button>
+        </div>
+        <ul id="apisList" class="space-y-2"></ul>
+    </div>
+
+    <div id="cluster" class="tab-pane hidden">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">Cluster Nodes</h2>
+            <button onclick="openClusterModal()" class="bg-[var(--primary-color)] text-white px-4 py-2 rounded hover:opacity-90 text-sm font-medium">+ Add Server</button>
+        </div>
+        <ul id="clusterList" class="space-y-2"></ul>
+    </div>
+
+    <!-- Export -->
+    <div id="export" class="tab-pane hidden">
+        <div class="bg-white rounded shadow p-6">
+            <h2 class="text-xl font-semibold mb-4">Export / Import</h2>
+            <button onclick="exportData()" class="bg-[var(--secondary-color)] text-white px-4 py-2 rounded hover:opacity-90 text-sm font-medium mb-3">Export JSON</button>
+            <input type="file" onchange="importData(event)" class="block w-full text-sm text-gray-700 mb-3" />
+            <pre id="output" class="bg-gray-100 p-3 rounded border text-sm"></pre>
+        </div>
+    </div>
+
+    <!-- JSON Modal -->
+    <div id="jsonModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-lg w-3/4 max-w-2xl">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h3 id="jsonModalTitle" class="text-lg font-semibold text-gray-800">Edit Object</h3>
+                <button onclick="closeJsonModal()" class="text-gray-500 hover:text-gray-700">&times;</button>
+            </div>
+            <div class="p-4">
+                <textarea id="jsonTextarea" class="w-full h-64 border rounded p-2 font-mono text-sm"></textarea>
+            </div>
+            <div class="flex justify-end space-x-2 p-4 border-t">
+                <button onclick="closeJsonModal()" class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">Cancel</button>
+                <button onclick="saveJsonModal()" class="px-4 py-2 bg-[var(--primary-color)] text-white rounded hover:opacity-90">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cluster Modal -->
+    <div id="clusterModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-lg w-3/4 max-w-md">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h3 id="clusterModalTitle" class="text-lg font-semibold text-gray-800">Add Server</h3>
+                <button onclick="closeClusterModal()" class="text-gray-500 hover:text-gray-700">&times;</button>
+            </div>
+            <div class="p-4 space-y-3">
+                <label class="block">
+                    <span class="text-sm text-gray-700">Protocol</span>
+                    <select id="clusterProtocol" class="mt-1 block w-full border rounded p-2">
+                        <option value="http">HTTP</option>
+                        <option value="https">HTTPS</option>
+                        <option value="mqtt">MQTT</option>
+                    </select>
+                </label>
+                <label class="block">
+                    <span class="text-sm text-gray-700">Host</span>
+                    <input id="clusterHost" type="text" class="mt-1 block w-full border rounded p-2" placeholder="server.example.com">
+                </label>
+                <label class="block">
+                    <span class="text-sm text-gray-700">Port</span>
+                    <input id="clusterPort" type="number" class="mt-1 block w-full border rounded p-2" value="80">
+                </label>
+                <label class="flex items-center space-x-2">
+                    <input id="clusterEnabled" type="checkbox" checked class="h-4 w-4">
+                    <span class="text-sm text-gray-700">Enabled</span>
+                </label>
+            </div>
+            <div class="flex justify-end space-x-2 p-4 border-t">
+                <button onclick="closeClusterModal()" class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">Cancel</button>
+                <button onclick="saveCluster()" class="px-4 py-2 bg-[var(--primary-color)] text-white rounded hover:opacity-90">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="mt-6 py-4 text-center text-gray-400 text-sm border-t">
+    © 2025 MCP Lightspeed Gateway — Built for managing tools, models, and clusters.
+</footer>
+
+<script>
+    let mcpObjects = { tools: [], resources: [], models: [], prompts: [], apis: [] };
+    let clusterObjects = { servers: [] };
+    let editContext = { type: null, idx: null };
+    let sparklineCharts = {};
+
+    const descriptions = {
+        tools: "Tools allow you to define executable functions that MCP can expose to clients.",
+        resources: "Resources represent data sources or assets available to the MCP gateway.",
+        models: "Models define AI or computation backends that MCP can call for inference.",
+        prompts: "Prompts provide reusable text or instruction templates for your models.",
+        apis: "APIs let you connect to external endpoints secured with credentials.",
+        cluster: "Cluster nodes let you connect multiple servers together for HA and scaling."
+    };
+    const singular = {
+        tools: "Tool",
+        resources: "Resource",
+        models: "Model",
+        prompts: "Prompt",
+        apis: "API",
+        cluster: "Server"
+    };
+
+    function openJsonModal(type, idx = null) {
+        editContext = { type, idx };
+        document.getElementById("jsonModalTitle").textContent = (idx === null ? "Add " : "Edit ") + singular[type];
+        const arr = mcpObjects[type];
+        document.getElementById("jsonTextarea").value = idx === null
+            ? JSON.stringify({ name: "", description: "", enabled: true }, null, 2)
+            : JSON.stringify(arr[idx], null, 2);
+        document.getElementById("jsonModal").classList.remove("hidden");
+    }
+    function closeJsonModal() { document.getElementById("jsonModal").classList.add("hidden"); editContext = { type:null, idx:null }; }
+    function saveJsonModal() {
+        try {
+            const obj = JSON.parse(document.getElementById("jsonTextarea").value);
+            let arr = mcpObjects[editContext.type];
+            if (editContext.idx === null) arr.push(obj); else arr[editContext.idx] = obj;
+            renderList(editContext.type); closeJsonModal();
+        } catch { alert("Invalid JSON"); }
+    }
+
+    function openClusterModal(idx = null) {
+        editContext = { type: "cluster", idx };
+        const modalTitle = document.getElementById("clusterModalTitle");
+        if (idx === null) {
+            modalTitle.textContent = "Add Server";
+            document.getElementById("clusterProtocol").value = "http";
+            document.getElementById("clusterHost").value = "";
+            document.getElementById("clusterPort").value = 80;
+            document.getElementById("clusterEnabled").checked = true;
+        } else {
+            modalTitle.textContent = "Edit Server";
+            const s = clusterObjects.servers[idx];
+            document.getElementById("clusterProtocol").value = s.protocol || "http";
+            document.getElementById("clusterHost").value = s.host || "";
+            document.getElementById("clusterPort").value = s.port || 80;
+            document.getElementById("clusterEnabled").checked = s.enabled !== false;
+        }
+        document.getElementById("clusterModal").classList.remove("hidden");
+    }
+    function closeClusterModal() { document.getElementById("clusterModal").classList.add("hidden"); }
+    function saveCluster() {
+        const server = {
+            protocol: document.getElementById("clusterProtocol").value,
+            host: document.getElementById("clusterHost").value,
+            port: parseInt(document.getElementById("clusterPort").value, 10),
+            enabled: document.getElementById("clusterEnabled").checked
+        };
+        if (editContext.idx === null) clusterObjects.servers.push(server);
+        else clusterObjects.servers[editContext.idx] = server;
+        renderList("cluster"); closeClusterModal();
+    }
+
+    function renderList(type) {
+        const list = document.getElementById(type+"List");
+        list.innerHTML = '';
+        let arr = type === "cluster" ? clusterObjects.servers : mcpObjects[type];
+        if (arr.length === 0) {
+            const container = document.createElement("div");
+            container.className = "flex flex-col items-center justify-center text-center py-16";
+            const p = document.createElement("p");
+            p.className = "text-gray-500 mb-6 max-w-md";
+            p.textContent = descriptions[type];
+            container.appendChild(p);
+            const btn = document.createElement("button");
+            btn.className = "bg-[var(--primary-color)] text-white px-6 py-3 rounded-lg text-lg font-semibold hover:opacity-90 shadow";
+            btn.textContent = `Create my first ${singular[type]}`;
+            btn.onclick = () => { if (type==="cluster") openClusterModal(); else openJsonModal(type); };
+            container.appendChild(btn);
+            list.appendChild(container);
+            return;
+        }
+        arr.forEach((item, idx) => {
+            if (type === "cluster") {
+                let statusClass = !item.host || !item.port ? "status-amber" : (item.enabled ? "status-green" : "status-red");
+                const li = document.createElement("li");
+                li.className = "flex justify-between items-center bg-white p-3 rounded shadow";
+                li.innerHTML = `
+            <div class="flex items-center space-x-2">
+              <span class="status-ball ${statusClass}"></span>
+              <span class="font-medium text-gray-700">${item.protocol}://${item.host}:${item.port}</span>
+            </div>
+            <div>
+              <button class="bg-gray-200 px-2 py-1 rounded text-xs" onclick="openClusterModal(${idx})">Edit</button>
+              <button class="bg-red-600 text-white px-2 py-1 rounded text-xs" onclick="deleteItem('cluster',${idx})">Delete</button>
+            </div>`;
+                list.appendChild(li);
+            } else {
+                const id = `${type}-spark-${idx}`;
+                const li = document.createElement("li");
+                li.className = "flex justify-between items-center bg-white p-3 rounded shadow";
+                li.innerHTML = `
+            <div class="flex items-center space-x-2">
+              <label class="switch">
+                <input type="checkbox" ${item.enabled!==false?"checked":""} onchange="toggleEnabled('${type}',${idx},this)">
+                <span class="slider"></span>
+              </label>
+              <span class="font-medium text-gray-700">${item.name || "(no name)"}${item.description?" – <em>"+item.description+"</em>":""}</span>
+            </div>
+            <div class="flex items-center space-x-3">
+              <div class="sparkline"><canvas id="${id}" width="96" height="24"></canvas></div>
+              <button class="bg-gray-200 px-2 py-1 rounded text-xs" onclick="openJsonModal('${type}',${idx})">Edit</button>
+              <button class="bg-red-600 text-white px-2 py-1 rounded text-xs" onclick="deleteItem('${type}',${idx})">Delete</button>
+            </div>`;
+                list.appendChild(li);
+                setTimeout(()=>initSparkline(id),50);
+            }
+        });
+    }
+
+    function initSparkline(id) {
+        const ctx = document.getElementById(id);
+        if (!ctx) return;
+        if (sparklineCharts[id]) sparklineCharts[id].destroy();
+        sparklineCharts[id] = new Chart(ctx, {
+            type: 'line',
+            data: { labels: Array.from({length:20},(_,i)=>i),
+                datasets:[{ data:Array.from({length:20},()=>Math.floor(Math.random()*100)),
+                    borderColor:'#2563eb', borderWidth:1, tension:0.3, fill:false, pointRadius:0 }]},
+            options:{ responsive:false, maintainAspectRatio:false, animation:false,
+                scales:{x:{display:false},y:{display:false}},
+                plugins:{legend:{display:false},tooltip:{enabled:false}} }
+        });
+        setInterval(()=>{
+            const chart = sparklineCharts[id];
+            if (!chart) return;
+            const dataset = chart.data.datasets[0].data;
+            dataset.push(Math.floor(Math.random()*100));
+            dataset.shift();
+            chart.update('none');
+        },1000);
+    }
+
+    function toggleEnabled(type, idx, el){ let arr = mcpObjects[type]; arr[idx].enabled = el.checked; }
+    function deleteItem(type, idx) { let arr = type === "cluster" ? clusterObjects.servers : mcpObjects[type]; arr.splice(idx,1); renderList(type); }
+    function exportData() { document.getElementById("output").textContent = JSON.stringify({ mcpObjects, clusterObjects }, null, 2); }
+    function importData(e) {
+        const file = e.target.files[0]; if (!file) return;
+        const reader = new FileReader();
+        reader.onload = evt => {
+            try {
+                const parsed = JSON.parse(evt.target.result);
+                if (parsed.mcpObjects) mcpObjects = parsed.mcpObjects;
+                if (parsed.clusterObjects) clusterObjects = parsed.clusterObjects;
+                ["tools","resources","models","prompts","apis","cluster"].forEach(renderList);
+            } catch { alert("Invalid JSON"); }
+        };
+        reader.readAsText(file);
+    }
+
+    ["tools","resources","models","prompts","apis","cluster"].forEach(renderList);
+    function switchTab(id) {
+        document.querySelectorAll(".tab").forEach(t => t.classList.remove("active","inactive"));
+        document.querySelectorAll(".tab").forEach(t => t.classList.add("inactive"));
+        const tab = document.querySelector(`.tab[data-target="${id}"]`); if(tab) tab.classList.add("active");
+        document.querySelectorAll(".tab-pane").forEach(p => p.classList.add("hidden"));
+        document.getElementById(id).classList.remove("hidden");
+    }
+    document.querySelectorAll(".tab").forEach(tab => tab.addEventListener("click",()=>switchTab(tab.dataset.target)));
+</script>
+</body>
+
+</html>
