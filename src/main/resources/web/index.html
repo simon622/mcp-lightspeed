@@ -55,7 +55,6 @@
         <button class="tab inactive" data-target="models">Models</button>
         <button class="tab inactive" data-target="prompts">Prompts</button>
         <button class="tab inactive" data-target="apis">APIs</button>
-        <button class="tab inactive" data-target="cluster">Cluster</button>
         <button class="tab inactive" data-target="export">Export / Import</button>
     </div>
 
@@ -112,14 +111,6 @@
             <button onclick="openJsonModal('apis')" class="bg-[var(--primary-color)] text-white px-4 py-2 rounded hover:opacity-90 text-sm font-medium">+ Add API</button>
         </div>
         <ul id="apisList" class="space-y-2"></ul>
-    </div>
-
-    <div id="cluster" class="tab-pane hidden">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-semibold">Cluster Nodes</h2>
-            <button onclick="openClusterModal()" class="bg-[var(--primary-color)] text-white px-4 py-2 rounded hover:opacity-90 text-sm font-medium">+ Add Server</button>
-        </div>
-        <ul id="clusterList" class="space-y-2"></ul>
     </div>
 
     <!-- Export -->
@@ -200,8 +191,7 @@
         tools: [],
         resources: [],
         prompts: [],
-        apis: [],
-        cluster: []
+        apis: []
     };
 
     let editContext = { type: null, idx: null };
@@ -213,7 +203,6 @@
         models: "Models define AI or computation backends that MCP can call for inference.",
         prompts: "Prompts provide reusable text or instruction templates for your models.",
         apis: "APIs let you connect to external endpoints secured with credentials.",
-        cluster: "Cluster nodes let you connect multiple servers together for HA and scaling."
     };
 
     const singular = {
@@ -222,7 +211,6 @@
         models: "Model",
         prompts: "Prompt",
         apis: "API",
-        cluster: "Server"
     };
 
     // ------------------ Modal Handling ------------------
@@ -242,8 +230,6 @@
                 defaultObj = { name:"", description:"", content:"", parameters:[], enabled:true }; break;
             case "apis":
                 defaultObj = { name:"", url:"", apiKey:"", username:"", password:"", enabled:true }; break;
-            case "cluster":
-                defaultObj = { protocol:"http", host:"", port:80, enabled:true }; break;
         }
 
         document.getElementById("jsonModalTitle").textContent = (idx===null ? "Add " : "Edit ")+singular[type];
@@ -259,34 +245,6 @@
             renderList(editContext.type); saveGraph(); closeJsonModal();
         } catch { alert("Invalid JSON"); }
     }
-
-    // ------------------ Cluster Modal ------------------
-    function openClusterModal(idx=null){
-        editContext={type:"cluster",idx};
-        const modalTitle=document.getElementById("clusterModalTitle");
-        if(idx===null){
-            modalTitle.textContent="Add Server";
-            document.getElementById("clusterProtocol").value="http";
-            document.getElementById("clusterHost").value="";
-            document.getElementById("clusterPort").value=80;
-            document.getElementById("clusterEnabled").checked=true;
-        } else {
-            modalTitle.textContent="Edit Server";
-            const s=mcpGraph.cluster[idx];
-            document.getElementById("clusterProtocol").value=s.protocol||"http";
-            document.getElementById("clusterHost").value=s.host||"";
-            document.getElementById("clusterPort").value=s.port||80;
-            document.getElementById("clusterEnabled").checked=s.enabled!==false;
-        }
-        document.getElementById("clusterModal").classList.remove("hidden");
-    }
-    function closeClusterModal(){ document.getElementById("clusterModal").classList.add("hidden"); }
-    function saveCluster(){
-        const server={protocol:document.getElementById("clusterProtocol").value, host:document.getElementById("clusterHost").value, port:parseInt(document.getElementById("clusterPort").value,10), enabled:document.getElementById("clusterEnabled").checked};
-        if(editContext.idx===null) mcpGraph.cluster.push(server); else mcpGraph.cluster[editContext.idx]=server;
-        renderList("cluster"); saveGraph(); closeClusterModal();
-    }
-
     // ------------------ Rendering ------------------
     function renderList(type){
         const list=document.getElementById(type+"List"); list.innerHTML=""; const arr=mcpGraph[type];
