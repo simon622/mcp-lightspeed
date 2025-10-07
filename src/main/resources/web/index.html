@@ -8,8 +8,8 @@
     <script src="./script.js"></script>
     <style>
         :root {
-            --primary-color: #f4862c;
-            --secondary-color: #16a34a;
+            --primary-color: #ffc000;
+            --secondary-color: #000;
             --accent-color: #9333ea;
         }
         .tab-bar { display:flex; border-bottom:1px solid #d1d5db; background:#f3f4f6; }
@@ -42,8 +42,8 @@
 <body class="bg-gray-50 p-8 font-sans">
 
 <header class="flex items-center mb-6">
-    <img src="./image.png" alt="Logo" class="w-20 h-20 rounded-full mr-3 shadow">
-    <h1 class="text-3xl font-bold text-gray-800">Lightspeed MCP Gateway</h1>
+    <img src="./hivemq.png" alt="Logo" class="w-40 rounded-full mr-3 shadow">
+    <h1 class="text-3xl font-bold text-gray-800">MCP Gateway</h1>
 </header>
 
 <div class="ml-8">
@@ -66,7 +66,7 @@
             <p class="mb-4 text-gray-700">The MCP Lightspeed Gateway provides a unified interface to manage all your Models, Tools, Resources, Prompts, APIs and Cluster nodes.</p>
             <p class="mb-4 text-gray-700">Use the tabs above to add, edit, and monitor objects. Each object row comes with live sparklines or status indicators, while the Export / Import tab allows you to manage your configurations with ease.</p>
             <div class="flex justify-center">
-                <button onclick="switchTab('export')" class="bg-[var(--primary-color)] text-white px-8 py-4 rounded-lg hover:opacity-90 text-xl font-semibold shadow">
+                <button onclick="switchTab('apis')" class="bg-[var(--primary-color)] text-white px-8 py-4 rounded-lg hover:opacity-90 text-xl font-semibold shadow">
                     Get Started →
                 </button>
             </div>

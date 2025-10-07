@@ -4,7 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.slj.lightspeed.mcp.Constants;
 
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -25,7 +28,9 @@ public record McpConfig (
             String description,
             @JsonProperty("input_schema") Schema inputSchema,
             boolean enabled,
-            Api api
+            McpToolType toolType,
+            Api api,
+            @JsonIgnore Method method
     ) {}
 
     public record Schema(
@@ -84,5 +89,9 @@ public record McpConfig (
             String password,
             boolean enabled
     ) {}
+
+    public static McpConfig create() {
+        return new McpConfig(Constants.NAME, Constants.VERSION, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+    }
 }
 

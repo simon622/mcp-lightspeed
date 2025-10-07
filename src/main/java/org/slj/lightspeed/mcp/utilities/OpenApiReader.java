@@ -10,7 +10,19 @@ public class OpenApiReader {
 
     public static final String TESTURL = "https://petstore3.swagger.io/api/v3/openapi.json";
 
-    public static OpenAPI read(final String endpointUrl) {
+    public static OpenAPI readFromFile(final String content) {
+        OpenAPI openAPI = new OpenAPIV3Parser().readContents(content).getOpenAPI();
+        if (openAPI != null) {
+            System.out.println("Title: " + openAPI.getInfo().getTitle());
+            System.out.println("Version: " + openAPI.getInfo().getVersion());
+            System.out.println("Paths: " + openAPI.getPaths().keySet());
+        } else {
+            System.err.println("Failed to parse OpenAPI spec");
+        }
+        return openAPI;
+    }
+
+    public static OpenAPI readFromEndpoint(final String endpointUrl) {
 
         try {
             URL url = new URL(endpointUrl);
@@ -30,6 +42,6 @@ public class OpenApiReader {
     }
 
     public static void main(String[] args) {
-        read("https://petstore3.swagger.io/api/v3/openapi.json");
+        readFromEndpoint("https://petstore3.swagger.io/api/v3/openapi.json");
     }
 }

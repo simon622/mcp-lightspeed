@@ -7,6 +7,7 @@ import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import org.slj.lightspeed.mcp.model.McpConfig;
+import org.slj.lightspeed.mcp.model.McpToolType;
 
 import java.util.*;
 
@@ -73,8 +74,7 @@ public class OpenApiToMcpConverter {
         }
 
         McpConfig.Schema schema = new McpConfig.Schema("object", properties, required);
-
-        return new McpConfig.Tool(name, description, schema, true, api);
+        return new McpConfig.Tool(name, description, schema, true, McpToolType.Api, api, null);
     }
 
     private static McpConfig.Schema mapSchema(io.swagger.v3.oas.models.media.Schema<?> swaggerSchema) {

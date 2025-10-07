@@ -1,9 +1,6 @@
 package org.slj.lightspeed.mcp.resources;
 
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.slj.lightspeed.mcp.model.McpConfig;
@@ -22,6 +19,17 @@ public class McpConfigResource {
         System.out.println("Received MCP config: " + config);
         McpRegistryImpl.getInstance().setConfig(config);
         return Response.ok()
+                .build();
+    }
+
+    @GET
+    @Path("/load")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response load() {
+
+        McpConfig config = McpRegistryImpl.getInstance().getConfig();
+        System.out.println("Loading MCP config: " + config);
+        return Response.ok(config)
                 .build();
     }
 
