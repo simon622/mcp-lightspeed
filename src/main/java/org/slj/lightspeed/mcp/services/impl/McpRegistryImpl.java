@@ -43,17 +43,19 @@ public class McpRegistryImpl implements McpRegistry {
         return config;
     }
 
-    private synchronized void initialize(){
+    public synchronized void initialize(){
         config = McpConfig.create();
         discoverFromClasspath(config);
     }
 
-    public void initializeWith(String openApiSpec){
+    public void initializeWith(String openApiSpec, String endpointUrl, String bearerToken){
 
         initialize();
         OpenAPI openAPI = OpenApiReader.readFromFile(openApiSpec);
-        List<McpConfig.Tool> tools = OpenApiToMcpConverter.convert(null, openAPI);
+        McpConfig.Api api = new McpConfig.Api(openAPI.getInfo().getTitle(),endpointUrl, bearerToken, null, null, true);
+        List<McpConfig.Tool> tools = OpenApiToMcpConverter.convert(api, openAPI);
         config.tools().addAll(tools);
+        config.apis().add(api);
     }
 
     public void setConfig(final McpConfig config) {

@@ -6,10 +6,11 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
-import org.slj.lightspeed.mcp.model.McpTool;
 import org.slj.lightspeed.mcp.services.impl.McpRegistryImpl;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.util.Objects;
 
@@ -22,8 +23,8 @@ public class ServerMain {
         // --------------------------
         if (args.length < 1) {
             System.err.println("""
-                Usage: java -jar lightspeed-mcp.jar <port> <openapi.yml>
-                Example: java -jar lightspeed-mcp.jar 9090 ./config/openapi.yml
+                Usage: java -jar lightspeed-mcp.jar <port> <openapi.yml> <endpointUrl>
+                Example: java -jar lightspeed-mcp.jar 9090 ./config/openapi.yml https://api.example.com
                 """);
             System.exit(1);
         }
@@ -38,8 +39,8 @@ public class ServerMain {
             return;
         }
 
-        // Then YAML (OpenAPI spec) path
-        if(args.length >= 2){
+        if(args.length > 1){
+            // Then YAML (OpenAPI spec) path
             String yamlPath = args[1];
             File yamlFile = new File(yamlPath);
             if (!yamlFile.exists()) {
@@ -47,9 +48,24 @@ public class ServerMain {
                 System.exit(1);
             }
 
+            // Third argument: endpoint URL
+            String endpointUrl = args[2];
+            if (!isValidHttpUrl(endpointUrl)) {
+                System.err.println("Invalid endpoint URL: " + endpointUrl);
+                System.err.println("   Must be a valid HTTP or HTTPS URL (e.g. https://example.com/api)");
+                System.exit(1);
+            }
+
+
             // Optionally read the YAML contents
             String yamlContent = Files.readString(yamlFile.toPath());
-            McpRegistryImpl.getInstance().initializeWith(yamlContent);
+            System.out.println("Loaded OpenAPI spec from: " + yamlFile.getAbsolutePath());
+            System.out.println("Endpoint URL: " + endpointUrl);
+
+            // Initialize registry (if applicable)
+            McpRegistryImpl.getInstance().initializeWith(yamlContent, endpointUrl, args[3]);
+        } else {
+            McpRegistryImpl.getInstance().initialize();
         }
 
 
@@ -83,9 +99,21 @@ public class ServerMain {
         Server server = new Server(port);
         server.setHandler(context);
 
-        System.out.printf("Starting MCP server on http://localhost:%d ...%n", port);
+        System.out.printf("Starting MCP server on http://localhost:%d%n", port);
         server.start();
         server.join();
     }
 
+    /**
+     * Validates that the given string is a well-formed HTTP or HTTPS URL.
+     */
+    private static boolean isValidHttpUrl(String url) {
+        try {
+            URL u = new URL(url);
+            String protocol = u.getProtocol().toLowerCase();
+            return protocol.equals("http") || protocol.equals("https");
+        } catch (MalformedURLException e) {
+            return false;
+        }
+    }
 }

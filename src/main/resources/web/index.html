@@ -53,7 +53,7 @@
         <button class="tab active" data-target="welcome">Welcome</button>
         <button class="tab inactive" data-target="tools">Tools</button>
         <button class="tab inactive" data-target="resources">Resources</button>
-        <button class="tab inactive" data-target="models">Models</button>
+<!--        <button class="tab inactive" data-target="models">Models</button>-->
         <button class="tab inactive" data-target="prompts">Prompts</button>
         <button class="tab inactive" data-target="apis">APIs</button>
         <button class="tab inactive" data-target="export">Configuration</button>
@@ -90,13 +90,13 @@
         <ul id="resourcesList" class="space-y-2"></ul>
     </div>
 
-    <div id="models" class="tab-pane hidden">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-semibold">Models</h2>
-            <button onclick="openJsonModal('models')" class="bg-[var(--primary-color)] text-white px-4 py-2 rounded hover:opacity-90 text-sm font-medium">+ Add Model</button>
-        </div>
-        <ul id="modelsList" class="space-y-2"></ul>
-    </div>
+<!--    <div id="models" class="tab-pane hidden">-->
+<!--        <div class="flex justify-between items-center mb-4">-->
+<!--            <h2 class="text-xl font-semibold">Models</h2>-->
+<!--            <button onclick="openJsonModal('models')" class="bg-[var(&#45;&#45;primary-color)] text-white px-4 py-2 rounded hover:opacity-90 text-sm font-medium">+ Add Model</button>-->
+<!--        </div>-->
+<!--        <ul id="modelsList" class="space-y-2"></ul>-->
+<!--    </div>-->
 
     <div id="prompts" class="tab-pane hidden">
         <div class="flex justify-between items-center mb-4">
@@ -185,7 +185,7 @@
 <script>
     // ------------------ Data Model ------------------
     let mcpGraph = {
-        models: [],
+        // models: [],
         tools: [],
         resources: [],
         prompts: [],
@@ -198,7 +198,7 @@
     const descriptions = {
         tools: "Tools allow you to define executable functions that MCP can expose to clients.",
         resources: "Resources represent data sources or assets available to the MCP gateway.",
-        models: "Models define AI or computation backends that MCP can call for inference.",
+        // models: "Models define AI or computation backends that MCP can call for inference.",
         prompts: "Prompts provide reusable text or instruction templates for your models.",
         apis: "APIs let you connect to external endpoints secured with credentials.",
     };
@@ -206,7 +206,7 @@
     const singular = {
         tools: "Tool",
         resources: "Resource",
-        models: "Model",
+        // models: "Model",
         prompts: "Prompt",
         apis: "API",
     };
@@ -218,8 +218,8 @@
 
         let defaultObj;
         switch (type) {
-            case "models":
-                defaultObj = { name:"", description:"", capabilities:[], version:"", provider:"", enabled:true }; break;
+            // case "models":
+            //     defaultObj = { name:"", description:"", capabilities:[], version:"", provider:"", enabled:true }; break;
             case "tools":
                 defaultObj = { name:"", description:"", inputSchema:{type:"object",properties:{}}, outputSchema:{type:"object",properties:{}}, enabled:true }; break;
             case "resources":
@@ -343,7 +343,7 @@
                 }
                 const data = await r.json();
                 mcpGraph = data;
-                ["tools","resources","models","prompts","apis"].forEach(renderList);
+                ["tools","resources","prompts","apis"].forEach(renderList);
 
                 showToast("APIs discovered");
             })
@@ -359,7 +359,7 @@
             }
             const data = await res.json();
             mcpGraph = data;
-            ["tools","resources","models","prompts","apis"].forEach(renderList);
+            ["tools","resources","prompts","apis"].forEach(renderList);
         } catch (err) {
             console.error("Failed to load graph", err);
         }
