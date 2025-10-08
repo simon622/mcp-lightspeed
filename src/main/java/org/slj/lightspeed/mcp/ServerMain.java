@@ -6,7 +6,10 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slj.lightspeed.mcp.services.impl.McpRegistryImpl;
+import org.slj.lightspeed.mcp.services.impl.McpServiceImpl;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -15,6 +18,8 @@ import java.nio.file.Files;
 import java.util.Objects;
 
 public class ServerMain {
+
+    private static final Logger log = LoggerFactory.getLogger(ServerMain.class);
 
     public static void main(String[] args) throws Exception {
 
@@ -99,7 +104,7 @@ public class ServerMain {
         Server server = new Server(port);
         server.setHandler(context);
 
-        System.out.printf("Starting MCP server on http://localhost:%d%n", port);
+        System.out.printf("Starting MCP server version  on http://localhost:%d%n", port);
         server.start();
         server.join();
     }
