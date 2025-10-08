@@ -1,7 +1,10 @@
 package org.slj.lightspeed.mcp.services.impl;
 
+import com.googlecode.jsonrpc4j.JsonRpcParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slj.lightspeed.mcp.Constants;
+import org.slj.lightspeed.mcp.model.InitializeResult;
 import org.slj.lightspeed.mcp.model.McpConfig;
 import org.slj.lightspeed.mcp.model.ToolCallParams;
 import org.slj.lightspeed.mcp.services.McpRegistry;
@@ -22,11 +25,25 @@ public class McpServiceImpl implements McpService {
     }
 
     @Override
-    public InitializeResult initialize(InitializeParams params) {
-        return new InitializeResult(
-            Map.of("name", "lightspeed-mcp-gateway", "version", "0.1.0"),
-            Map.of("tools", Map.of())
+    public InitializeResult initialize(@JsonRpcParam("protocolVersion") String version, @JsonRpcParam("capabilities") Map<String, Object> capabilities, @JsonRpcParam("clientInfo") Map<String, Object> clientInfo){
+
+        InitializeResult result = new InitializeResult(
+                "2024-11-05",
+                new InitializeResult.Capabilities(
+                        Map.of(), // logging {}
+                        new InitializeResult.Prompts(false),
+                        new InitializeResult.Resources(false, false),
+                        new InitializeResult.Tools(false)
+                ),
+                new InitializeResult.ServerInfo(
+                        Constants.NAME,
+                        Constants.DESCRIPTION,
+                        Constants.VERSION
+                ),
+                "Optional instructions for the client"
         );
+
+        return result;
     }
 
     McpService.Tool toServiceTool(McpConfig.Tool cfg) {
