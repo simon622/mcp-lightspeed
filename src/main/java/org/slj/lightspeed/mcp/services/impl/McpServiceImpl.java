@@ -1,13 +1,19 @@
 package org.slj.lightspeed.mcp.services.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slj.lightspeed.mcp.model.McpConfig;
+import org.slj.lightspeed.mcp.model.ToolCallParams;
 import org.slj.lightspeed.mcp.services.McpRegistry;
 import org.slj.lightspeed.mcp.services.McpService;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 public class McpServiceImpl implements McpService {
+
+    private static final Logger log = LoggerFactory.getLogger(McpServiceImpl.class);
 
     private final McpRegistry registry;
 
@@ -34,25 +40,47 @@ public class McpServiceImpl implements McpService {
 
     @Override
     public ToolsListResult toolsList() {
+
+        log.info("Tools-list command requested");
+
         List<McpService.Tool> tools = registry.getConfig().tools().stream()
                 .filter(McpConfig.Tool::enabled)
                 .map(this::toServiceTool)
                 .toList();
+
+        log.info("Tools-list command listed {} tools", tools.size());
+
         return new ToolsListResult(tools);
     }
 
     @Override
-    public ToolCallResult toolsCall(ToolCallParams params) {
-        // Lookup tool by name
+    public ToolCallResult toolsCall(String name, Map<String, Object> arguments) {
+        return toolsCallOld(new ToolCallParams(name, arguments));
+    }
+
+//    @Override
+    public ToolCallResult toolsCallOld(ToolCallParams params) {
+
+        log.info("Making tools-call with params: {}", params);
+
         var tool = registry.getConfig().tools().stream()
-                .filter(t -> t.name().equals(params.name()))
+                .filter(t -> t.name().equals(params.getName()))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Unknown tool: " + params.name()));
+                .orElseThrow(() -> new RuntimeException("Unknown tool: " + params.getName()));
 
-        System.err.println("Execute tool: " + tool.name() + " with args: " + params.arguments());
+        log.info("Success - matched tool {} with arguments: {}", tool.name(), params.getArguments());
 
-        return new ToolCallResult(List.of(
-            Map.of("type", "text", "text", "Executed tool " + params.name() + " with args " + params.arguments())
-        ));
+        try {
+            return switch (tool.toolType()) {
+                case Api -> new ApiToolHandler().callTool(tool, params);
+                case JavaMethod -> new MethodToolHandler().callTool(tool, params);
+            };
+        } catch (Exception e) {
+            e.printStackTrace();
+            Map<String, Object> error = new LinkedHashMap<>();
+            error.put("type", "error");
+            error.put("text", "Error executing tool " + params.getName() + ": " + e.getMessage());
+            return new ToolCallResult(List.of(error));
+        }
     }
 }

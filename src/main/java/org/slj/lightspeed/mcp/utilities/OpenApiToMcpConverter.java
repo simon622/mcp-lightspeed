@@ -6,6 +6,7 @@ import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
+import org.slj.lightspeed.mcp.model.ApiRequestMethod;
 import org.slj.lightspeed.mcp.model.McpConfig;
 import org.slj.lightspeed.mcp.model.McpToolType;
 
@@ -32,6 +33,7 @@ public class OpenApiToMcpConverter {
 
     private static McpConfig.Tool convertOperation(McpConfig.Api api, String path, String method, Operation operation) {
         // Tool name: operationId or fallback
+
         String name = (operation.getOperationId() != null && !operation.getOperationId().isBlank())
                 ? operation.getOperationId()
                 : method.toLowerCase() + "_" + path.replace("/", "_");
@@ -74,7 +76,7 @@ public class OpenApiToMcpConverter {
         }
 
         McpConfig.Schema schema = new McpConfig.Schema("object", properties, required);
-        return new McpConfig.Tool(name, description, schema, true, McpToolType.Api, api, null);
+        return new McpConfig.Tool(name, description, schema, true, McpToolType.Api, api, ApiRequestMethod.valueOf(method), null, path);
     }
 
     private static McpConfig.Schema mapSchema(io.swagger.v3.oas.models.media.Schema<?> swaggerSchema) {

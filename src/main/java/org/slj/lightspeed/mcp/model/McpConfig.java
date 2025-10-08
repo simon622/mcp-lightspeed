@@ -30,7 +30,9 @@ public record McpConfig (
             boolean enabled,
             McpToolType toolType,
             Api api,
-            @JsonIgnore Method method
+            @JsonIgnore ApiRequestMethod requestMethod,
+            @JsonIgnore Method method,
+            @JsonIgnore String path
     ) {}
 
     public record Schema(

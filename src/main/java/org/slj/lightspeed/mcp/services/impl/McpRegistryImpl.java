@@ -1,6 +1,9 @@
 package org.slj.lightspeed.mcp.services.impl;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.models.OpenAPI;
+import org.slj.lightspeed.mcp.model.ApiRequestMethod;
 import org.slj.lightspeed.mcp.model.McpConfig;
 import org.slj.lightspeed.mcp.model.McpToolType;
 import org.slj.lightspeed.mcp.services.McpRegistry;
@@ -128,8 +131,8 @@ public class McpRegistryImpl implements McpRegistry {
                     schema,
                     toolMethod.enabled,
                     McpToolType.JavaMethod,
-                    null,
-                    toolMethod.method
+                    null,null,
+                    toolMethod.method,null
             );
 
             if (config.tools().stream().noneMatch(t -> t.name().equals(tool.name()))) {

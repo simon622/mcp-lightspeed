@@ -1,0 +1,12 @@
+POST http://localhost:8080/api/mcp-rpc
+Content-Type: application/json
+
+{
+"jsonrpc": "2.0",
+"id": 2,
+"method": "tools/call",
+"params": {
+    "name": "me",
+    "arguments": {}
+}
+}

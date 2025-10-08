@@ -2,6 +2,8 @@ package org.slj.lightspeed.mcp.services;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.googlecode.jsonrpc4j.JsonRpcMethod;
+import com.googlecode.jsonrpc4j.JsonRpcParam;
+import org.slj.lightspeed.mcp.model.ToolCallParams;
 
 import java.util.List;
 import java.util.Map;
@@ -29,10 +31,10 @@ public interface McpService {
     ) {}
 
     // === 3. tools/call ===
-    record ToolCallParams(
-            String name,
-            Map<String, Object> arguments
-    ) {}
+//    record ToolCallParams(
+//            String name,
+//            Map<String, Object> arguments
+//    ) {}
 
     record ToolCallResult(
             List<Map<String, Object>> content
@@ -45,6 +47,14 @@ public interface McpService {
     ToolsListResult toolsList();
 
     @JsonRpcMethod("tools/call")
-    ToolCallResult toolsCall(ToolCallParams params);
+    ToolCallResult toolsCall(@JsonRpcParam("name") String name, @JsonRpcParam("arguments") Map<String, Object> arguments);
+
+//    @JsonRpcMethod("tools/call")
+//    ToolCallResult toolsCall(ToolCallParams params);
+
+//    public ToolCallResult toolsCall(String name, Map<String, Object> arguments)
+
+
+
 
 }
