@@ -76,7 +76,7 @@ public class OpenApiToMcpConverter {
         }
 
         McpConfig.Schema schema = new McpConfig.Schema("object", properties, required);
-        return new McpConfig.Tool(name, description, schema, true, McpToolType.Api, api, ApiRequestMethod.valueOf(method), null, path);
+        return new McpConfig.Tool(name, description, schema, true, McpToolType.API, api, ApiRequestMethod.valueOf(method), null, path);
     }
 
     private static McpConfig.Schema mapSchema(io.swagger.v3.oas.models.media.Schema<?> swaggerSchema) {

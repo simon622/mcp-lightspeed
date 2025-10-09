@@ -130,7 +130,7 @@ public class McpRegistryImpl implements McpRegistry {
                     descWithSig,
                     schema,
                     toolMethod.enabled,
-                    McpToolType.JavaMethod,
+                    McpToolType.JAVA_METHOD,
                     null,null,
                     toolMethod.method,null
             );

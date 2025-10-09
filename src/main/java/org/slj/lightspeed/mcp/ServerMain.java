@@ -8,8 +8,8 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slj.lightspeed.mcp.server.CorsFilter;
 import org.slj.lightspeed.mcp.services.impl.McpRegistryImpl;
-import org.slj.lightspeed.mcp.services.impl.McpServiceImpl;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -44,7 +44,7 @@ public class ServerMain {
             return;
         }
 
-        if(args.length > 1){
+        if (args.length > 1) {
             // Then YAML (OpenAPI spec) path
             String yamlPath = args[1];
             File yamlFile = new File(yamlPath);
@@ -57,7 +57,8 @@ public class ServerMain {
             String endpointUrl = args[2];
             if (!isValidHttpUrl(endpointUrl)) {
                 System.err.println("Invalid endpoint URL: " + endpointUrl);
-                System.err.println("   Must be a valid HTTP or HTTPS URL (e.g. https://example.com/api)");
+                System.err.println("   Must be a valid HTTP or HTTPS URL " +
+                    "(e.g. https://example.com/api)");
                 System.exit(1);
             }
 
@@ -77,20 +78,27 @@ public class ServerMain {
         // --------------------------
         // 2. Setup Jetty + Jersey
         // --------------------------
-        ServletContextHandler context = new ServletContextHandler(ServletContextHandler.NO_SESSIONS);
+        ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/");
 
         ResourceConfig config = new ResourceConfig()
-                .packages("org.slj.lightspeed.mcp.resources")
-                .register(org.glassfish.jersey.jackson.JacksonFeature.class);
+            .packages("org.slj.lightspeed.mcp.resources")
+            .register(CorsFilter.class)
+            .register(org.glassfish.jersey.media.sse.SseFeature.class)
+            .register(org.glassfish.jersey.jackson.JacksonFeature.class);
 
         ServletHolder jerseyServlet = new ServletHolder(new ServletContainer(config));
-        context.addServlet(jerseyServlet, "/api/*");
+        jerseyServlet.setAsyncSupported(true);
+        context.addServlet(jerseyServlet, "/*");
+
+        System.out.println("Servlet API loaded from: " +
+            jakarta.servlet.Servlet.class.getProtectionDomain().getCodeSource().getLocation());
+
 
         // Serve static files from /web
         ServletHolder staticHolder = new ServletHolder("static", DefaultServlet.class);
         String resourceBase = Objects.requireNonNull(
-                ServerMain.class.getClassLoader().getResource("web")).toExternalForm();
+            ServerMain.class.getClassLoader().getResource("web")).toExternalForm();
 
         staticHolder.setInitParameter("resourceBase", resourceBase);
         staticHolder.setInitParameter("dirAllowed", "true");

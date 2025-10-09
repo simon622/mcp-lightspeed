@@ -13,7 +13,7 @@ import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record McpConfig (
+public record McpConfig(
         String name,
         String version,
         List<Tool> tools,
@@ -93,7 +93,7 @@ public record McpConfig (
     ) {}
 
     public static McpConfig create() {
-        return new McpConfig(Constants.NAME, Constants.VERSION, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+        return new McpConfig(Constants.NAME, Constants.VERSION, new ArrayList<>(),
+            new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
     }
 }
-

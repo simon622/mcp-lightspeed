@@ -314,7 +314,7 @@
     function exportData(){ document.getElementById("output").textContent=JSON.stringify(mcpGraph,null,2); }
 
     function saveGraph() {
-        fetch("/api/mcp-config/save", {
+        fetch("/mcp-config/save", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(mcpGraph, null, 2)
@@ -331,7 +331,7 @@
     }
 
     function discoverApis() {
-        fetch("/api/mcp-config/discover", {
+        fetch("/mcp-config/discover", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(mcpGraph, null, 2)
@@ -352,7 +352,7 @@
 
     async function loadGraph() {
         try {
-            const res = await fetch("/api/mcp-config/load");
+            const res = await fetch("/mcp-config/load");
             if (!res.ok) {
                 console.warn("No saved graph found");
                 return;

@@ -89,8 +89,8 @@ public class McpServiceImpl implements McpService {
 
         try {
             return switch (tool.toolType()) {
-                case Api -> new ApiToolHandler().callTool(tool, params);
-                case JavaMethod -> new MethodToolHandler().callTool(tool, params);
+                case API -> new ApiToolHandler().callTool(tool, params);
+                case JAVA_METHOD -> new MethodToolHandler().callTool(tool, params);
             };
         } catch (Exception e) {
             e.printStackTrace();

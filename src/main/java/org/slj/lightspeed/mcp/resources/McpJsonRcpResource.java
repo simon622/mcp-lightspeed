@@ -10,7 +10,7 @@ import org.slj.lightspeed.mcp.services.impl.McpServiceImpl;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
-@Path("/mcp-rpc")
+@Path("/mcp")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class McpJsonRcpResource {
