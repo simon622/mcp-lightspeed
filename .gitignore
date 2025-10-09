@@ -1,1 +1,4 @@
-/ext/hivemq-pulse-unspecified-openapi.yaml
+*openapi.yaml
+*openapi.yml
+target
+.idea

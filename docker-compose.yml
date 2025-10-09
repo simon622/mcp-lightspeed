@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  mcp-server:
+    build:
+      context: .
+      no_cache: true
+    environment:
+      - PORT=8080
+      - OPENAPI_SPEC=openapi.yml
+      - DOWNSTREAM_API=${DOWNSTREAM_API:-http://localhost:8080/api}
+      - BEARER_TOKEN=${BEARER_TOKEN}
+    networks:
+      - mcp-network
+
+  caddy:
+    image: caddy:latest
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - mcp-network
+    depends_on:
+      - mcp-server
+
+networks:
+  mcp-network:
+    driver: bridge
+
+volumes:
+  caddy_data:
+  caddy_config:
